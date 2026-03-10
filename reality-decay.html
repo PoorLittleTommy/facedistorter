@@ -81,8 +81,9 @@
       line-height: 1.35;
     }
     .tier-btn:not(:last-child) { border-right: 1px solid rgba(255,255,255,0.08); }
-    .tier-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .tier-btn:hover:not(.locked) { background: rgba(255,255,255,0.08); color: #fff; }
     .tier-btn.active { color: #fff; }
+    .tier-btn.locked { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
     .tier-btn[data-tier="0"].active { background: #1a3a2a; }
     .tier-btn[data-tier="1"].active { background: #1a2a4a; }
     .tier-btn[data-tier="2"].active { background: #2a1a4a; }
@@ -128,6 +129,7 @@
       transition: transform 150ms;
       color: #fff;
     }
+    .cta { text-decoration: none; }
     .cta:active { transform: scale(0.97); }
     .cta[data-tier="0"] { background: linear-gradient(135deg, #22aa55, #118844); box-shadow: 0 8px 30px rgba(34,170,85,0.35); }
     .cta[data-tier="1"] { background: linear-gradient(135deg, #3366dd, #2244aa); box-shadow: 0 8px 30px rgba(51,102,221,0.35); }
@@ -190,6 +192,7 @@
 <div class="page" id="page">
   <h1 class="title">The Reality Decay 🫪</h1>
   <p class="subtitle">As MC rises, reality crumbles.</p>
+  <div id="liveMc" style="font-size:1.1rem;font-weight:700;margin-bottom:16px;opacity:0.7;text-align:center;">Loading market cap...</div>
 
   <div class="tier-bar">
     <button class="tier-btn active" data-tier="0">&lt;$1M<br>Stable</button>
@@ -206,7 +209,7 @@
 
   <div class="info">
     <div class="mood" id="mood">Stable Reality</div>
-    <button class="cta" id="cta" data-tier="0">Needs more distortion. Ape in.</button>
+    <a class="cta" id="cta" data-tier="0" href="https://dexscreener.com/solana/CCmh7tvVRrCaExBn6Uu3AyDZr5P16WhJnZcLvAMHkec4" target="_blank" rel="noopener noreferrer">Needs more distortion. Ape in.</a>
     <div class="mc-label" id="mcLabel">Market Cap: &lt;$1M</div>
   </div>
 </div>
@@ -218,16 +221,18 @@
 
 <script>
 const TIERS = [
-  { level: 15,  mood: "Stable Reality", cta: "Needs more distortion. Ape in.",   mc: "Market Cap: <$1M" },
-  { level: 30,  mood: "Warping",        cta: "Reality is bending. Buy the dip.", mc: "Market Cap: $10M" },
-  { level: 50,  mood: "Melting",         cta: "Face is melting. Send it!",        mc: "Market Cap: $100M" },
-  { level: 80,  mood: "Shattered",       cta: "There is no going back.",          mc: "Market Cap: $500M" },
-  { level: 100, mood: "Collapsed",       cta: "Reality has collapsed.",           mc: "Market Cap: $900M" },
-  { level: 100, mood: "SINGULARITY",     cta: "WE ARE ALL DISTORTED. 🫪",        mc: "Market Cap: $1B+" },
+  { level: 15,  threshold: 0,          mood: "Stable Reality", cta: "Needs more distortion. Ape in.",   mc: "Market Cap: <$1M" },
+  { level: 30,  threshold: 10000000,   mood: "Warping",        cta: "Reality is bending. Buy the dip.", mc: "Market Cap: $10M" },
+  { level: 50,  threshold: 100000000,  mood: "Melting",         cta: "Face is melting. Send it!",        mc: "Market Cap: $100M" },
+  { level: 80,  threshold: 500000000,  mood: "Shattered",       cta: "There is no going back.",          mc: "Market Cap: $500M" },
+  { level: 100, threshold: 900000000,  mood: "Collapsed",       cta: "Reality has collapsed.",           mc: "Market Cap: $900M" },
+  { level: 100, threshold: 1000000000, mood: "SINGULARITY",     cta: "WE ARE ALL DISTORTED. 🫪",        mc: "Market Cap: $1B+" },
 ];
 
 let currentTier = 0;
+let maxReachedTier = 0;
 
+const liveMcEl = document.getElementById("liveMc");
 const moodEl   = document.getElementById("mood");
 const ctaEl    = document.getElementById("cta");
 const mcEl     = document.getElementById("mcLabel");
@@ -325,9 +330,54 @@ function applyTier(tier) {
   }
 }
 
+function updateLockedButtons() {
+  tierBtns.forEach(b => {
+    const t = Number(b.dataset.tier);
+    b.classList.toggle("locked", t > maxReachedTier);
+  });
+}
+
 tierBtns.forEach(btn => {
-  btn.addEventListener("click", () => applyTier(Number(btn.dataset.tier)));
+  btn.addEventListener("click", () => {
+    const t = Number(btn.dataset.tier);
+    if (t <= maxReachedTier) applyTier(t);
+  });
 });
+
+function mcToTier(mc) {
+  for (let i = TIERS.length - 1; i >= 0; i--) {
+    if (mc >= TIERS[i].threshold) return i;
+  }
+  return 0;
+}
+
+function formatMc(n) {
+  if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
+  if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return '$' + (n / 1e3).toFixed(1) + 'K';
+  return '$' + n.toFixed(0);
+}
+
+async function fetchMarketCap() {
+  try {
+    const res = await fetch('https://api.dexscreener.com/latest/dex/pairs/solana/CCmh7tvVRrCaExBn6Uu3AyDZr5P16WhJnZcLvAMHkec4');
+    const data = await res.json();
+    const mc = Number(data.pair?.marketCap || data.pair?.fdv || 0);
+    if (mc > 0) {
+      liveMcEl.textContent = 'Live Market Cap: ' + formatMc(mc);
+      const tier = mcToTier(mc);
+      maxReachedTier = tier;
+      updateLockedButtons();
+      applyTier(tier);
+    } else {
+      liveMcEl.textContent = 'Market cap unavailable';
+    }
+  } catch (e) {
+    liveMcEl.textContent = 'Market cap unavailable';
+  }
+}
+
+setInterval(fetchMarketCap, 30000);
 
 // Load the face image
 const faceImg = new Image();
@@ -337,6 +387,7 @@ faceImg.onload = () => {
   sourceCtx.drawImage(faceImg, 0, 0);
   sourceLoaded = true;
   applyTier(0);
+  fetchMarketCap();
 };
 faceImg.src = "default.png";
 </script>
