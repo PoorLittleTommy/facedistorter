@@ -30,11 +30,11 @@
         linear-gradient(145deg, var(--bg-1), var(--bg-2));
       display: grid;
       place-items: center;
-      padding: 22px;
+      padding: 12px;
     }
 
     .app {
-      width: min(980px, 100%);
+      width: min(520px, 100%);
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 18px;
@@ -56,7 +56,7 @@
     }
 
     .header {
-      padding: 20px 22px;
+      padding: 16px 18px;
       border-bottom: 1px solid var(--border);
       background: linear-gradient(90deg, rgba(255, 250, 245, 0.9), rgba(255, 236, 219, 0.85));
     }
@@ -75,15 +75,15 @@
 
     .content {
       display: grid;
-      grid-template-columns: 300px 1fr;
+      grid-template-columns: 1fr;
       gap: 0;
     }
 
     .controls {
-      padding: 20px;
-      border-right: 1px solid var(--border);
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
       display: grid;
-      gap: 14px;
+      gap: 12px;
       align-content: start;
     }
 
@@ -134,10 +134,10 @@
     }
 
     .stage {
-      min-height: 420px;
+      min-height: 280px;
       display: grid;
       place-items: center;
-      padding: 18px;
+      padding: 16px;
       background:
         linear-gradient(45deg, rgba(255, 255, 255, 0.65) 25%, transparent 25%) 0 0 / 16px 16px,
         linear-gradient(-45deg, rgba(255, 255, 255, 0.65) 25%, transparent 25%) 0 8px / 16px 16px,
@@ -148,8 +148,8 @@
 
     canvas {
       max-width: 100%;
-      max-height: 70vh;
-      border-radius: 14px;
+      max-height: 60vh;
+      border-radius: 12px;
       border: 1px solid rgba(0, 0, 0, 0.15);
       background: white;
       box-shadow: 0 16px 30px rgba(0, 0, 0, 0.13);
@@ -164,12 +164,7 @@
     }
 
     @media (max-width: 860px) {
-      .content {
-        grid-template-columns: 1fr;
-      }
-
       .controls {
-        border-right: 0;
         border-bottom: 1px solid var(--border);
       }
     }
@@ -190,8 +185,9 @@
         </div>
 
         <div class="card">
-          <label>Effect</label>
-          <div class="hint" style="margin: 0;">Spherize + vertical stretch = "shocked" face. Auto-applied on upload.</div>
+          <label for="intensity">How distorted are you?</label>
+          <input id="intensity" type="range" min="0" max="100" value="75" style="width:100%" />
+          <div id="intensityValue" style="font-size:0.9rem;opacity:0.78;margin-top:6px;">75%</div>
         </div>
 
         <div class="actions">
@@ -200,7 +196,7 @@
       </aside>
 
       <section class="stage">
-        <p class="empty" id="emptyMsg">Upload a photo to start. The app will render a distorted version on canvas.</p>
+        <p class="empty" id="emptyMsg">Upload or drag & drop a photo to distort</p>
         <canvas id="canvas" hidden></canvas>
       </section>
     </section>
@@ -208,6 +204,8 @@
 
   <script>
     const fileInput = document.getElementById("fileInput");
+    const intensityInput = document.getElementById("intensity");
+    const intensityLabel = document.getElementById("intensityValue");
     const downloadBtn = document.getElementById("downloadBtn");
     const canvas = document.getElementById("canvas");
     const emptyMsg = document.getElementById("emptyMsg");
@@ -276,8 +274,9 @@
       //  - Slight vertical stretch so the face looks elongated/jaw-dropped
       //  - No swirl, no RGB split — clean meme distortion
 
-      const bulgeStrength = 1.8;   // >1 = outward bulge (fisheye), <1 = pinch
-      const vertStretch   = 1.25;  // >1 = taller face = jaw-drop look
+      const t = Number(intensityInput.value) / 100; // 0 = no effect, 1 = max
+      const bulgeStrength = 1 + t * 1.2;   // 1 = no bulge, 2.2 = extreme
+      const vertStretch   = 1 + t * 0.35;  // 1 = normal, 1.35 = max jaw-drop
 
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
@@ -348,6 +347,22 @@
     });
 
     downloadBtn.addEventListener("click", downloadImage);
+
+    // Drag & drop support
+    const stage = document.querySelector(".stage");
+    stage.addEventListener("dragover", (e) => { e.preventDefault(); stage.style.outline = "3px dashed var(--accent)"; });
+    stage.addEventListener("dragleave", () => { stage.style.outline = ""; });
+    stage.addEventListener("drop", (e) => {
+      e.preventDefault();
+      stage.style.outline = "";
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith("image/")) handleFile(file);
+    });
+
+    intensityInput.addEventListener("input", () => {
+      intensityLabel.textContent = `${intensityInput.value}%`;
+      distortImage();
+    });
   </script>
 </body>
 </html>
