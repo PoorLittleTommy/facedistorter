@@ -86,10 +86,11 @@
     .tier-btn.locked { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
     .tier-btn[data-tier="0"].active { background: #1a3a2a; }
     .tier-btn[data-tier="1"].active { background: #1a2a4a; }
-    .tier-btn[data-tier="2"].active { background: #2a1a4a; }
-    .tier-btn[data-tier="3"].active { background: #3a1a3a; }
-    .tier-btn[data-tier="4"].active { background: #4a1a1a; }
-    .tier-btn[data-tier="5"].active { background: #5a0a0a; }
+    .tier-btn[data-tier="2"].active { background: #1a2a5a; }
+    .tier-btn[data-tier="3"].active { background: #2a1a4a; }
+    .tier-btn[data-tier="4"].active { background: #3a1a3a; }
+    .tier-btn[data-tier="5"].active { background: #4a1a1a; }
+    .tier-btn[data-tier="6"].active { background: #5a0a0a; }
 
     .stage {
       position: relative;
@@ -133,10 +134,11 @@
     .cta:active { transform: scale(0.97); }
     .cta[data-tier="0"] { background: linear-gradient(135deg, #22aa55, #118844); box-shadow: 0 8px 30px rgba(34,170,85,0.35); }
     .cta[data-tier="1"] { background: linear-gradient(135deg, #3366dd, #2244aa); box-shadow: 0 8px 30px rgba(51,102,221,0.35); }
-    .cta[data-tier="2"] { background: linear-gradient(135deg, #7744dd, #5522aa); box-shadow: 0 8px 30px rgba(119,68,221,0.35); }
-    .cta[data-tier="3"] { background: linear-gradient(135deg, #cc44ff, #8822bb); box-shadow: 0 8px 30px rgba(200,68,255,0.35); }
-    .cta[data-tier="4"] { background: linear-gradient(135deg, #ff4444, #cc1111); box-shadow: 0 8px 30px rgba(255,68,68,0.4); }
-    .cta[data-tier="5"] { background: linear-gradient(135deg, #ff0000, #990000); box-shadow: 0 8px 40px rgba(255,0,0,0.5); }
+    .cta[data-tier="2"] { background: linear-gradient(135deg, #5566ee, #3344bb); box-shadow: 0 8px 30px rgba(85,102,238,0.35); }
+    .cta[data-tier="3"] { background: linear-gradient(135deg, #7744dd, #5522aa); box-shadow: 0 8px 30px rgba(119,68,221,0.35); }
+    .cta[data-tier="4"] { background: linear-gradient(135deg, #cc44ff, #8822bb); box-shadow: 0 8px 30px rgba(200,68,255,0.35); }
+    .cta[data-tier="5"] { background: linear-gradient(135deg, #ff4444, #cc1111); box-shadow: 0 8px 30px rgba(255,68,68,0.4); }
+    .cta[data-tier="6"] { background: linear-gradient(135deg, #ff0000, #990000); box-shadow: 0 8px 40px rgba(255,0,0,0.5); }
 
     .mc-label {
       margin-top: 12px;
@@ -195,12 +197,13 @@
   <div id="liveMc" style="font-size:1.1rem;font-weight:700;margin-bottom:16px;opacity:0.7;text-align:center;">Loading market cap...</div>
 
   <div class="tier-bar">
-    <button class="tier-btn active" data-tier="0">&lt;$1M<br>Stable</button>
-    <button class="tier-btn" data-tier="1">$1M+<br>Warping</button>
-    <button class="tier-btn" data-tier="2">$100M<br>Melting</button>
-    <button class="tier-btn" data-tier="3">$500M<br>Shattered</button>
-    <button class="tier-btn" data-tier="4">$900M<br>Collapsed</button>
-    <button class="tier-btn" data-tier="5">$1B<br>SINGULARITY</button>
+    <button class="tier-btn active" data-tier="0">&lt;1M<br>Stable</button>
+    <button class="tier-btn" data-tier="1">1M+<br>Warping</button>
+    <button class="tier-btn" data-tier="2">10M+<br>Distorting</button>
+    <button class="tier-btn" data-tier="3">100M+<br>Melting</button>
+    <button class="tier-btn" data-tier="4">500M+<br>Shattered</button>
+    <button class="tier-btn" data-tier="5">900M+<br>Collapsed</button>
+    <button class="tier-btn" data-tier="6">1B+<br>SINGULARITY</button>
   </div>
 
   <div class="stage" id="stage">
@@ -221,12 +224,13 @@
 
 <script>
 const TIERS = [
-  { level: 15,  threshold: 0,          mood: "Stable Reality", cta: "Needs more distortion. Ape in.",   mc: "Market Cap: <$1M" },
-  { level: 30,  threshold: 1000000,    mood: "Warping",        cta: "Reality is bending. Buy the dip.", mc: "Market Cap: $1M+" },
-  { level: 50,  threshold: 100000000,  mood: "Melting",         cta: "Face is melting. Send it!",        mc: "Market Cap: $100M" },
-  { level: 80,  threshold: 500000000,  mood: "Shattered",       cta: "There is no going back.",          mc: "Market Cap: $500M" },
-  { level: 100, threshold: 900000000,  mood: "Collapsed",       cta: "Reality has collapsed.",           mc: "Market Cap: $900M" },
-  { level: 100, threshold: 1000000000, mood: "SINGULARITY",     cta: "WE ARE ALL DISTORTED. 🫪",        mc: "Market Cap: $1B+" },
+  { level: 15,  threshold: 0,           mood: "Stable Reality", cta: "Needs more distortion. Ape in.",   mc: "Market Cap: <$1M" },
+  { level: 30,  threshold: 1000000,     mood: "Warping",        cta: "Reality is bending. Buy the dip.", mc: "Market Cap: $1M+" },
+  { level: 40,  threshold: 10000000,    mood: "Distorting",     cta: "Face is shifting. Keep going!",    mc: "Market Cap: $10M+" },
+  { level: 50,  threshold: 100000000,   mood: "Melting",        cta: "Face is melting. Send it!",        mc: "Market Cap: $100M+" },
+  { level: 80,  threshold: 500000000,   mood: "Shattered",      cta: "There is no going back.",          mc: "Market Cap: $500M+" },
+  { level: 100, threshold: 900000000,   mood: "Collapsed",      cta: "Reality has collapsed.",           mc: "Market Cap: $900M+" },
+  { level: 100, threshold: 1000000000,  mood: "SINGULARITY",    cta: "WE ARE ALL DISTORTED. 🫪",        mc: "Market Cap: $1B+" },
 ];
 
 let currentTier = 0;
@@ -314,7 +318,7 @@ function applyTier(tier) {
   mcEl.textContent   = t.mc;
   tierBtns.forEach(b => b.classList.toggle("active", Number(b.dataset.tier) === tier));
 
-  if (tier === 5) {
+  if (tier === 6) {
     // $1B takeover — fill entire page with level 100 distorted faces
     takeover.classList.add("active");
     takeoverGrid.innerHTML = "";
