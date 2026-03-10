@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" translate="no">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -103,7 +103,15 @@
     }
 
     input[type="file"] {
+      display: none;
+    }
+
+    .file-btn {
+      color: var(--ink);
+      background: #fff6ef;
+      border: 1px solid var(--border);
       width: 100%;
+      text-align: center;
     }
 
     .actions {
@@ -185,7 +193,8 @@
 
       <aside class="controls">
         <div class="card">
-          <label for="fileInput">Choose a face photo</label>
+          <label>Choose a face photo</label>
+          <button type="button" class="file-btn" id="fileTrigger">Choose File</button>
           <input id="fileInput" type="file" accept="image/*" />
         </div>
 
@@ -341,6 +350,8 @@
       link.click();
     }
 
+    document.getElementById("fileTrigger").addEventListener("click", () => fileInput.click());
+
     fileInput.addEventListener("change", (event) => {
       const [file] = event.target.files || [];
       handleFile(file);
@@ -363,6 +374,14 @@
       intensityLabel.textContent = `${intensityInput.value}%`;
       distortImage();
     });
+
+    // Load default demo image
+    const defaultImg = new Image();
+    defaultImg.onload = () => {
+      drawLoadedImage(defaultImg);
+      distortImage();
+    };
+    defaultImg.src = "default.png";
   </script>
 </body>
 </html>
