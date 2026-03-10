@@ -209,19 +209,7 @@ tierBtns.forEach(btn => {
   });
 });
 
-// ===== Render the 🫪 emoji to a texture =====
-function createEmojiTexture(size) {
-  const c = document.createElement("canvas");
-  c.width = c.height = size;
-  const ctx = c.getContext("2d");
-  ctx.fillStyle = "#0a0a0f";
-  ctx.fillRect(0, 0, size, size);
-  ctx.font = `${size * 0.7}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("🫪", size / 2, size / 2 + size * 0.03);
-  return c;
-}
+// ===== Load distorted face image as texture =====
 
 // ===== WebGL =====
 const gl = canvas.getContext("webgl", { antialias: true, alpha: false });
@@ -368,8 +356,15 @@ gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-const emojiCanvas = createEmojiTexture(512);
-gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, emojiCanvas);
+// Load face image
+const faceImg = new Image();
+faceImg.onload = () => {
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, faceImg);
+};
+faceImg.src = "default.png";
+// Placeholder 1x1 pixel until image loads
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([10,10,15,255]));
 
 // Resize
 function resize() {
