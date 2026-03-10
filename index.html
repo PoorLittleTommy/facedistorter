@@ -178,6 +178,11 @@
     </header>
 
     <section class="content">
+      <section class="stage">
+        <p class="empty" id="emptyMsg">Upload or drag & drop a photo to distort</p>
+        <canvas id="canvas" hidden></canvas>
+      </section>
+
       <aside class="controls">
         <div class="card">
           <label for="fileInput">Choose a face photo</label>
@@ -194,11 +199,6 @@
           <button id="downloadBtn" class="download" type="button" disabled>Download</button>
         </div>
       </aside>
-
-      <section class="stage">
-        <p class="empty" id="emptyMsg">Upload or drag & drop a photo to distort</p>
-        <canvas id="canvas" hidden></canvas>
-      </section>
     </section>
   </main>
 
