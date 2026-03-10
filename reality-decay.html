@@ -17,17 +17,10 @@
       overflow-x: hidden;
     }
 
-    /* ---- scanline overlay ---- */
     body::after {
       content: '';
       position: fixed; inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        rgba(0,0,0,0.06) 0px,
-        rgba(0,0,0,0.06) 1px,
-        transparent 1px,
-        transparent 3px
-      );
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 3px);
       pointer-events: none;
       z-index: 100;
     }
@@ -38,9 +31,10 @@
       align-items: center;
       min-height: 100vh;
       padding: 20px;
+      position: relative;
+      z-index: 1;
     }
 
-    /* ---- header ---- */
     .title {
       font-size: clamp(1.6rem, 4vw, 3rem);
       font-weight: 700;
@@ -52,9 +46,7 @@
       -webkit-text-fill-color: transparent;
       animation: hue-scroll 4s linear infinite;
     }
-    @keyframes hue-scroll {
-      to { background-position: 300% 0; }
-    }
+    @keyframes hue-scroll { to { background-position: 300% 0; } }
 
     .subtitle {
       font-size: 0.95rem;
@@ -63,27 +55,25 @@
       text-align: center;
     }
 
-    /* ---- tier selector ---- */
     .tier-bar {
       display: flex;
-      gap: 0;
       border-radius: 12px;
       overflow: hidden;
       border: 1px solid rgba(255,255,255,0.1);
       margin-bottom: 20px;
       flex-wrap: wrap;
-      max-width: 680px;
+      max-width: 820px;
       width: 100%;
     }
     .tier-btn {
       flex: 1 1 0;
-      min-width: 140px;
-      padding: 12px 10px;
+      min-width: 100px;
+      padding: 12px 8px;
       background: rgba(255,255,255,0.04);
       border: none;
       color: #aaa;
       font-family: inherit;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 200ms;
@@ -94,11 +84,12 @@
     .tier-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
     .tier-btn.active { color: #fff; }
     .tier-btn[data-tier="0"].active { background: #1a3a2a; }
-    .tier-btn[data-tier="1"].active { background: #2a2a4a; }
-    .tier-btn[data-tier="2"].active { background: #3a1a3a; }
-    .tier-btn[data-tier="3"].active { background: #4a1a1a; }
+    .tier-btn[data-tier="1"].active { background: #1a2a4a; }
+    .tier-btn[data-tier="2"].active { background: #2a1a4a; }
+    .tier-btn[data-tier="3"].active { background: #3a1a3a; }
+    .tier-btn[data-tier="4"].active { background: #4a1a1a; }
+    .tier-btn[data-tier="5"].active { background: #5a0a0a; }
 
-    /* ---- canvas stage ---- */
     .stage {
       position: relative;
       width: min(520px, 90vw);
@@ -108,13 +99,12 @@
       border: 1px solid rgba(255,255,255,0.08);
       box-shadow: 0 0 80px rgba(120, 0, 255, 0.15), 0 0 30px rgba(255, 60, 60, 0.1);
     }
-    canvas {
+    .stage canvas {
       display: block;
       width: 100%;
       height: 100%;
     }
 
-    /* ---- info card ---- */
     .info {
       margin-top: 24px;
       text-align: center;
@@ -135,15 +125,16 @@
       font-family: inherit;
       border: none;
       cursor: pointer;
-      transition: transform 150ms, box-shadow 150ms;
+      transition: transform 150ms;
       color: #fff;
     }
     .cta:active { transform: scale(0.97); }
-
     .cta[data-tier="0"] { background: linear-gradient(135deg, #22aa55, #118844); box-shadow: 0 8px 30px rgba(34,170,85,0.35); }
-    .cta[data-tier="1"] { background: linear-gradient(135deg, #4466ff, #2244cc); box-shadow: 0 8px 30px rgba(68,102,255,0.35); }
-    .cta[data-tier="2"] { background: linear-gradient(135deg, #cc44ff, #8822bb); box-shadow: 0 8px 30px rgba(200,68,255,0.35); }
-    .cta[data-tier="3"] { background: linear-gradient(135deg, #ff2222, #cc0000); box-shadow: 0 8px 30px rgba(255,34,34,0.45); }
+    .cta[data-tier="1"] { background: linear-gradient(135deg, #3366dd, #2244aa); box-shadow: 0 8px 30px rgba(51,102,221,0.35); }
+    .cta[data-tier="2"] { background: linear-gradient(135deg, #7744dd, #5522aa); box-shadow: 0 8px 30px rgba(119,68,221,0.35); }
+    .cta[data-tier="3"] { background: linear-gradient(135deg, #cc44ff, #8822bb); box-shadow: 0 8px 30px rgba(200,68,255,0.35); }
+    .cta[data-tier="4"] { background: linear-gradient(135deg, #ff4444, #cc1111); box-shadow: 0 8px 30px rgba(255,68,68,0.4); }
+    .cta[data-tier="5"] { background: linear-gradient(135deg, #ff0000, #990000); box-shadow: 0 8px 40px rgba(255,0,0,0.5); }
 
     .mc-label {
       margin-top: 12px;
@@ -151,26 +142,66 @@
       opacity: 0.4;
     }
 
-    /* ---- mobile ---- */
-    @media (max-width: 500px) {
-      .tier-btn { min-width: 0; font-size: 0.72rem; padding: 10px 6px; }
+    /* ---- $1B takeover ---- */
+    .takeover {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: #000;
+      overflow: hidden;
+    }
+    .takeover.active { display: block; }
+    .takeover-grid {
+      display: flex;
+      flex-wrap: wrap;
+      width: 100vw;
+      min-height: 100vh;
+    }
+    .takeover-grid canvas {
+      width: 20vw;
+      height: 20vw;
+    }
+    .takeover-text {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      z-index: 55;
+      pointer-events: none;
+    }
+    .takeover-text h1 {
+      font-size: clamp(2rem, 6vw, 5rem);
+      color: #fff;
+      text-shadow: 0 0 40px #ff0000, 0 0 80px #ff0000;
+      animation: pulse-text 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes pulse-text {
+      to { transform: scale(1.06); text-shadow: 0 0 60px #ff4400, 0 0 120px #ff0000; }
+    }
+
+    @media (max-width: 600px) {
+      .tier-btn { min-width: 0; font-size: 0.65rem; padding: 10px 4px; }
+      .takeover-grid canvas { width: 33.33vw; height: 33.33vw; }
     }
   </style>
 </head>
 <body>
-<div class="page">
+<div class="page" id="page">
   <h1 class="title">The Reality Decay 🫪</h1>
   <p class="subtitle">As MC rises, reality crumbles.</p>
 
   <div class="tier-bar">
-    <button class="tier-btn active" data-tier="0">&lt;$1M<br>Stable Reality</button>
-    <button class="tier-btn" data-tier="1">$1M–$10M<br>Warp Drive</button>
-    <button class="tier-btn" data-tier="2">$10M–$50M<br>Psychedelic Fever</button>
-    <button class="tier-btn" data-tier="3">$100M+<br>Singularity</button>
+    <button class="tier-btn active" data-tier="0">&lt;$1M<br>Stable</button>
+    <button class="tier-btn" data-tier="1">$10M<br>Warping</button>
+    <button class="tier-btn" data-tier="2">$100M<br>Melting</button>
+    <button class="tier-btn" data-tier="3">$500M<br>Shattered</button>
+    <button class="tier-btn" data-tier="4">$900M<br>Collapsed</button>
+    <button class="tier-btn" data-tier="5">$1B<br>SINGULARITY</button>
   </div>
 
-  <div class="stage">
-    <canvas id="gl"></canvas>
+  <div class="stage" id="stage">
+    <canvas id="canvas"></canvas>
   </div>
 
   <div class="info">
@@ -180,212 +211,134 @@
   </div>
 </div>
 
+<div class="takeover" id="takeover">
+  <div class="takeover-grid" id="takeoverGrid"></div>
+  <div class="takeover-text"><h1>WE ARE ALL DISTORTED 🫪</h1></div>
+</div>
+
 <script>
-// ===== Tier data =====
 const TIERS = [
-  { mood: "Stable Reality",    cta: "Needs more distortion. Ape in.",         mc: "Market Cap: <$1M" },
-  { mood: "Warp Drive",        cta: "Reality is bending. Buy the dip.",       mc: "Market Cap: $1M – $10M" },
-  { mood: "Psychedelic Fever", cta: "Interns are watching. Send it!",         mc: "Market Cap: $10M – $50M" },
-  { mood: "Singularity",       cta: "WE ARE THE EMOJI. 🫪",                  mc: "Market Cap: $100M+" },
+  { level: 15,  mood: "Stable Reality", cta: "Needs more distortion. Ape in.",   mc: "Market Cap: <$1M" },
+  { level: 30,  mood: "Warping",        cta: "Reality is bending. Buy the dip.", mc: "Market Cap: $10M" },
+  { level: 50,  mood: "Melting",         cta: "Face is melting. Send it!",        mc: "Market Cap: $100M" },
+  { level: 80,  mood: "Shattered",       cta: "There is no going back.",          mc: "Market Cap: $500M" },
+  { level: 100, mood: "Collapsed",       cta: "Reality has collapsed.",           mc: "Market Cap: $900M" },
+  { level: 100, mood: "SINGULARITY",     cta: "WE ARE ALL DISTORTED. 🫪",        mc: "Market Cap: $1B+" },
 ];
 
 let currentTier = 0;
 
-// ===== DOM =====
-const moodEl  = document.getElementById("mood");
-const ctaEl   = document.getElementById("cta");
-const mcEl    = document.getElementById("mcLabel");
-const canvas  = document.getElementById("gl");
+const moodEl   = document.getElementById("mood");
+const ctaEl    = document.getElementById("cta");
+const mcEl     = document.getElementById("mcLabel");
+const canvas   = document.getElementById("canvas");
+const ctx      = canvas.getContext("2d", { willReadFrequently: true });
+const takeover = document.getElementById("takeover");
+const takeoverGrid = document.getElementById("takeoverGrid");
 const tierBtns = document.querySelectorAll(".tier-btn");
 
+// Source image
+const sourceCanvas = document.createElement("canvas");
+const sourceCtx = sourceCanvas.getContext("2d", { willReadFrequently: true });
+let sourceLoaded = false;
+
+function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+function sampleBilinear(srcData, w, h, fx, fy, ch) {
+  const x0 = Math.floor(fx), y0 = Math.floor(fy);
+  const x1 = Math.min(x0 + 1, w - 1), y1 = Math.min(y0 + 1, h - 1);
+  const dx = fx - x0, dy = fy - y0;
+  const cx0 = clamp(x0, 0, w - 1), cy0 = clamp(y0, 0, h - 1);
+  const tl = srcData[(cy0 * w + cx0) * 4 + ch];
+  const tr = srcData[(cy0 * w + x1) * 4 + ch];
+  const bl = srcData[(y1 * w + cx0) * 4 + ch];
+  const br = srcData[(y1 * w + x1) * 4 + ch];
+  return tl * (1 - dx) * (1 - dy) + tr * dx * (1 - dy) + bl * (1 - dx) * dy + br * dx * dy;
+}
+
+function distort(targetCanvas, level) {
+  if (!sourceLoaded) return;
+  const w = sourceCanvas.width, h = sourceCanvas.height;
+  targetCanvas.width = w;
+  targetCanvas.height = h;
+  const tCtx = targetCanvas.getContext("2d", { willReadFrequently: true });
+  const src = sourceCtx.getImageData(0, 0, w, h);
+  const srcData = src.data;
+  const out = tCtx.createImageData(w, h);
+  const outData = out.data;
+
+  const t = level / 100;
+  const cx = w / 2, cy = h / 2;
+  const radius = Math.min(cx, cy) * 0.92;
+  const bulgeStrength = 1 + t * 1.2;
+  const vertStretch = 1 + t * 0.35;
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      let dx = (x - cx) / radius;
+      let dy = (y - cy) / radius;
+      dy /= vertStretch;
+      const r = Math.sqrt(dx * dx + dy * dy);
+      let sx, sy;
+      if (r < 1.0 && r > 0) {
+        const rn = Math.pow(r, bulgeStrength) / r;
+        sx = cx + dx * rn * radius;
+        sy = cy + dy * rn * radius;
+      } else {
+        sx = cx + dx * radius;
+        sy = cy + dy * radius;
+      }
+      sx = clamp(sx, 0, w - 1);
+      sy = clamp(sy, 0, h - 1);
+      const i = (y * w + x) * 4;
+      outData[i]     = sampleBilinear(srcData, w, h, sx, sy, 0);
+      outData[i + 1] = sampleBilinear(srcData, w, h, sx, sy, 1);
+      outData[i + 2] = sampleBilinear(srcData, w, h, sx, sy, 2);
+      outData[i + 3] = 255;
+    }
+  }
+  tCtx.putImageData(out, 0, 0);
+}
+
+function applyTier(tier) {
+  currentTier = tier;
+  const t = TIERS[tier];
+  moodEl.textContent = t.mood;
+  ctaEl.textContent  = t.cta;
+  ctaEl.dataset.tier = tier;
+  mcEl.textContent   = t.mc;
+  tierBtns.forEach(b => b.classList.toggle("active", Number(b.dataset.tier) === tier));
+
+  if (tier === 5) {
+    // $1B takeover — fill entire page with level 100 distorted faces
+    takeover.classList.add("active");
+    takeoverGrid.innerHTML = "";
+    const count = 25; // 5x5 grid
+    for (let i = 0; i < count; i++) {
+      const c = document.createElement("canvas");
+      takeoverGrid.appendChild(c);
+      distort(c, 100);
+    }
+  } else {
+    takeover.classList.remove("active");
+    distort(canvas, t.level);
+  }
+}
+
 tierBtns.forEach(btn => {
-  btn.addEventListener("click", () => {
-    currentTier = Number(btn.dataset.tier);
-    tierBtns.forEach(b => b.classList.toggle("active", b === btn));
-    moodEl.textContent = TIERS[currentTier].mood;
-    ctaEl.textContent  = TIERS[currentTier].cta;
-    ctaEl.dataset.tier = currentTier;
-    mcEl.textContent   = TIERS[currentTier].mc;
-  });
+  btn.addEventListener("click", () => applyTier(Number(btn.dataset.tier)));
 });
 
-// ===== Load distorted face image as texture =====
-
-// ===== WebGL =====
-const gl = canvas.getContext("webgl", { antialias: true, alpha: false });
-if (!gl) { document.body.innerHTML = "<h1 style='color:#fff;text-align:center;padding:40px'>WebGL not supported</h1>"; }
-
-function compileShader(type, src) {
-  const s = gl.createShader(type);
-  gl.shaderSource(s, src);
-  gl.compileShader(s);
-  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s));
-  return s;
-}
-
-const VERT = `
-attribute vec2 a_pos;
-varying vec2 v_uv;
-void main() {
-  v_uv = a_pos * 0.5 + 0.5;
-  gl_Position = vec4(a_pos, 0.0, 1.0);
-}`;
-
-const FRAG = `
-precision highp float;
-varying vec2 v_uv;
-uniform sampler2D u_tex;
-uniform float u_time;
-uniform float u_tier;  // 0..3
-
-// --- helpers ---
-vec2 center = vec2(0.5);
-
-void main() {
-  vec2 uv = v_uv;
-  vec2 d  = uv - center;
-  float dist = length(d);
-  float angle = atan(d.y, d.x);
-
-  // ======= TIER 0 : Stable Reality — subtle wobble + 5% fisheye =======
-  float wobble = sin(u_time * 1.5 + uv.y * 12.0) * 0.003 + cos(u_time * 1.2 + uv.x * 10.0) * 0.003;
-  uv += wobble;
-  // Mild fisheye
-  vec2 d0 = uv - center;
-  float r0 = length(d0);
-  float fisheye0 = 1.0 + 0.05 * r0 * r0;
-  uv = center + d0 * fisheye0;
-
-  if (u_tier >= 1.0) {
-    // ======= TIER 1 : Warp Drive — eyes drifting + 30% liquid swirl =======
-    vec2 d1 = uv - center;
-    float r1 = length(d1);
-    float a1 = atan(d1.y, d1.x);
-    float swirl1 = 0.3 * (1.0 - smoothstep(0.0, 0.5, r1)) * sin(u_time * 0.8);
-    a1 += swirl1;
-    uv = center + r1 * vec2(cos(a1), sin(a1));
-    // Eye drift
-    uv.x += sin(u_time * 2.0 + uv.y * 8.0) * 0.012;
-    uv.y += cos(u_time * 1.6 + uv.x * 6.0) * 0.008;
-  }
-
-  if (u_tier >= 2.0) {
-    // ======= TIER 2 : Psychedelic Fever — 60% swirl + chromatic aberration =======
-    vec2 d2 = uv - center;
-    float r2 = length(d2);
-    float a2 = atan(d2.y, d2.x);
-    float swirl2 = 0.6 * (1.0 - smoothstep(0.0, 0.55, r2)) * sin(u_time * 1.2 + 1.0);
-    a2 += swirl2;
-    uv = center + r2 * vec2(cos(a2), sin(a2));
-  }
-
-  if (u_tier >= 3.0) {
-    // ======= TIER 3 : Singularity — kaleidoscopic vortex =======
-    vec2 d3 = uv - center;
-    float r3 = length(d3);
-    float a3 = atan(d3.y, d3.x);
-    // Kaleidoscope: mirror into 6 segments
-    float segments = 6.0;
-    a3 = mod(a3, 6.2832 / segments);
-    a3 = abs(a3 - 3.1416 / segments);
-    uv = center + r3 * vec2(cos(a3), sin(a3));
-    // Massive vortex
-    vec2 d4 = uv - center;
-    float r4 = length(d4);
-    float a4 = atan(d4.y, d4.x);
-    a4 += 1.5 * (1.0 - smoothstep(0.0, 0.6, r4)) * sin(u_time * 0.6);
-    uv = center + r4 * vec2(cos(a4), sin(a4));
-    // Pulse zoom
-    float pulse = 1.0 + 0.06 * sin(u_time * 3.0);
-    uv = center + (uv - center) * pulse;
-  }
-
-  // Clamp
-  uv = clamp(uv, 0.0, 1.0);
-
-  // --- Chromatic aberration (scales with tier) ---
-  float aberr = (0.002 + u_tier * 0.006) * (0.5 + 0.5 * sin(u_time * 2.0));
-  vec2 dir = normalize(uv - center + 0.001);
-  float r = texture2D(u_tex, uv + dir * aberr).r;
-  float g = texture2D(u_tex, uv).g;
-  float b = texture2D(u_tex, uv - dir * aberr).b;
-
-  vec3 col = vec3(r, g, b);
-
-  // Vignette
-  float vig = 1.0 - smoothstep(0.3, 0.75, length(v_uv - center));
-  col *= 0.7 + 0.3 * vig;
-
-  // Tier 3: color cycling
-  if (u_tier >= 3.0) {
-    float hueShift = u_time * 0.4;
-    col.r *= 0.8 + 0.2 * sin(hueShift);
-    col.g *= 0.8 + 0.2 * sin(hueShift + 2.094);
-    col.b *= 0.8 + 0.2 * sin(hueShift + 4.189);
-  }
-
-  gl_FragColor = vec4(col, 1.0);
-}`;
-
-const vs = compileShader(gl.VERTEX_SHADER, VERT);
-const fs = compileShader(gl.FRAGMENT_SHADER, FRAG);
-const prog = gl.createProgram();
-gl.attachShader(prog, vs);
-gl.attachShader(prog, fs);
-gl.linkProgram(prog);
-gl.useProgram(prog);
-
-// Full-screen quad
-const buf = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-const aPos = gl.getAttribLocation(prog, "a_pos");
-gl.enableVertexAttribArray(aPos);
-gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-// Uniforms
-const uTime = gl.getUniformLocation(prog, "u_time");
-const uTier = gl.getUniformLocation(prog, "u_tier");
-const uTex  = gl.getUniformLocation(prog, "u_tex");
-
-// Texture
-const tex = gl.createTexture();
-gl.bindTexture(gl.TEXTURE_2D, tex);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-
-// Load face image
+// Load the face image
 const faceImg = new Image();
 faceImg.onload = () => {
-  gl.bindTexture(gl.TEXTURE_2D, tex);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, faceImg);
+  sourceCanvas.width = faceImg.width;
+  sourceCanvas.height = faceImg.height;
+  sourceCtx.drawImage(faceImg, 0, 0);
+  sourceLoaded = true;
+  applyTier(0);
 };
 faceImg.src = "default.png";
-// Placeholder 1x1 pixel until image loads
-gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([10,10,15,255]));
-
-// Resize
-function resize() {
-  const rect = canvas.parentElement.getBoundingClientRect();
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  canvas.width  = rect.width * dpr;
-  canvas.height = rect.height * dpr;
-  gl.viewport(0, 0, canvas.width, canvas.height);
-}
-window.addEventListener("resize", resize);
-resize();
-
-// Render loop
-function frame(t) {
-  const sec = t * 0.001;
-  gl.uniform1f(uTime, sec);
-  gl.uniform1f(uTier, currentTier);
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-  requestAnimationFrame(frame);
-}
-requestAnimationFrame(frame);
 </script>
 </body>
 </html>
