@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Face Distorter</title>
+  <style>
+    :root {
+      --bg-1: #fff9f2;
+      --bg-2: #ffe1c5;
+      --ink: #1d1a17;
+      --accent: #d64523;
+      --accent-soft: #ff7d57;
+      --card: rgba(255, 255, 255, 0.82);
+      --border: rgba(29, 26, 23, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1400px 700px at 10% 10%, #fff4e8 0%, transparent 58%),
+        radial-gradient(900px 500px at 90% 90%, #ffd6bf 0%, transparent 60%),
+        linear-gradient(145deg, var(--bg-1), var(--bg-2));
+      display: grid;
+      place-items: center;
+      padding: 22px;
+    }
+
+    .app {
+      width: min(980px, 100%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 18px 60px rgba(69, 30, 8, 0.16);
+      overflow: hidden;
+      backdrop-filter: blur(5px);
+      animation: pop-in 500ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+
+    @keyframes pop-in {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .header {
+      padding: 20px 22px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(90deg, rgba(255, 250, 245, 0.9), rgba(255, 236, 219, 0.85));
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.2rem, 2.1vw, 1.85rem);
+      letter-spacing: 0.02em;
+    }
+
+    .hint {
+      margin: 8px 0 0;
+      opacity: 0.78;
+      font-size: 0.95rem;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 0;
+    }
+
+    .controls {
+      padding: 20px;
+      border-right: 1px solid var(--border);
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+    }
+
+    input[type="file"] {
+      width: 100%;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: transform 160ms ease, filter 160ms ease;
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    .download {
+      color: var(--ink);
+      background: #fff6ef;
+      border: 1px solid var(--border);
+    }
+
+    .stage {
+      min-height: 420px;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      background:
+        linear-gradient(45deg, rgba(255, 255, 255, 0.65) 25%, transparent 25%) 0 0 / 16px 16px,
+        linear-gradient(-45deg, rgba(255, 255, 255, 0.65) 25%, transparent 25%) 0 8px / 16px 16px,
+        linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.65) 75%) 8px -8px / 16px 16px,
+        linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.65) 75%) -8px 0 / 16px 16px,
+        #ffd1b7;
+    }
+
+    canvas {
+      max-width: 100%;
+      max-height: 70vh;
+      border-radius: 14px;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      background: white;
+      box-shadow: 0 16px 30px rgba(0, 0, 0, 0.13);
+    }
+
+    .empty {
+      font-weight: 700;
+      text-align: center;
+      max-width: 280px;
+      line-height: 1.45;
+      opacity: 0.82;
+    }
+
+    @media (max-width: 860px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>Face Distorter — "Huh?" Effect</h1>
+      <p class="hint">Upload a face photo and make it look shocked / "huh?"</p>
+    </header>
+
+    <section class="content">
+      <aside class="controls">
+        <div class="card">
+          <label for="fileInput">Choose a face photo</label>
+          <input id="fileInput" type="file" accept="image/*" />
+        </div>
+
+        <div class="card">
+          <label>Effect</label>
+          <div class="hint" style="margin: 0;">Spherize + vertical stretch = "shocked" face. Auto-applied on upload.</div>
+        </div>
+
+        <div class="actions">
+          <button id="downloadBtn" class="download" type="button" disabled>Download</button>
+        </div>
+      </aside>
+
+      <section class="stage">
+        <p class="empty" id="emptyMsg">Upload a photo to start. The app will render a distorted version on canvas.</p>
+        <canvas id="canvas" hidden></canvas>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const canvas = document.getElementById("canvas");
+    const emptyMsg = document.getElementById("emptyMsg");
+
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const sourceCanvas = document.createElement("canvas");
+    const sourceCtx = sourceCanvas.getContext("2d", { willReadFrequently: true });
+
+    let sourceLoaded = false;
+
+    function clamp(v, lo, hi) {
+      return v < lo ? lo : v > hi ? hi : v;
+    }
+
+    // Bilinear interpolation for smooth sampling
+    function sampleBilinear(srcData, w, h, fx, fy, ch) {
+      const x0 = Math.floor(fx), y0 = Math.floor(fy);
+      const x1 = Math.min(x0 + 1, w - 1), y1 = Math.min(y0 + 1, h - 1);
+      const dx = fx - x0, dy = fy - y0;
+      const cx0 = clamp(x0, 0, w - 1), cy0 = clamp(y0, 0, h - 1);
+      const tl = srcData[(cy0 * w + cx0) * 4 + ch];
+      const tr = srcData[(cy0 * w + x1) * 4 + ch];
+      const bl = srcData[(y1 * w + cx0) * 4 + ch];
+      const br = srcData[(y1 * w + x1) * 4 + ch];
+      return tl * (1 - dx) * (1 - dy) + tr * dx * (1 - dy) + bl * (1 - dx) * dy + br * dx * dy;
+    }
+
+    function drawLoadedImage(image) {
+      const maxSide = 1024;
+      const scale = Math.min(1, maxSide / Math.max(image.width, image.height));
+      const width = Math.max(1, Math.round(image.width * scale));
+      const height = Math.max(1, Math.round(image.height * scale));
+
+      sourceCanvas.width = width;
+      sourceCanvas.height = height;
+      canvas.width = width;
+      canvas.height = height;
+
+      sourceCtx.clearRect(0, 0, width, height);
+      sourceCtx.drawImage(image, 0, 0, width, height);
+      ctx.drawImage(sourceCanvas, 0, 0);
+
+      sourceLoaded = true;
+      emptyMsg.hidden = true;
+      canvas.hidden = false;
+      downloadBtn.disabled = true;
+    }
+
+    function distortImage() {
+      if (!sourceLoaded) return;
+
+      const width = sourceCanvas.width;
+      const height = sourceCanvas.height;
+      const src = sourceCtx.getImageData(0, 0, width, height);
+      const srcData = src.data;
+      const out = ctx.createImageData(width, height);
+      const outData = out.data;
+
+      const cx = width / 2;
+      const cy = height / 2;
+      // Radius of the spherize effect — covers most of the face
+      const radius = Math.min(cx, cy) * 0.92;
+
+      // "Shocked / huh?" effect:
+      //  - Strong spherize (bulge) pushing center outward like a fisheye lens
+      //  - Slight vertical stretch so the face looks elongated/jaw-dropped
+      //  - No swirl, no RGB split — clean meme distortion
+
+      const bulgeStrength = 1.8;   // >1 = outward bulge (fisheye), <1 = pinch
+      const vertStretch   = 1.25;  // >1 = taller face = jaw-drop look
+
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          // Normalised offset from center
+          let dx = (x - cx) / radius;
+          let dy = (y - cy) / radius;
+
+          // Apply vertical stretch (squeeze source coords = stretch output)
+          dy /= vertStretch;
+
+          const r = Math.sqrt(dx * dx + dy * dy);
+
+          let sx, sy;
+
+          if (r < 1.0) {
+            // Inside the spherize circle — apply bulge
+            // Attempt a smooth power-curve remap so center bulges outward
+            const rn = Math.pow(r, bulgeStrength) / r; // remap factor
+            sx = cx + dx * rn * radius;
+            sy = cy + dy * rn * radius;
+          } else {
+            // Outside effect radius — map 1-to-1 (with stretch still applied)
+            sx = cx + dx * radius;
+            sy = cy + dy * radius;
+          }
+
+          sx = clamp(sx, 0, width - 1);
+          sy = clamp(sy, 0, height - 1);
+
+          const i = (y * width + x) * 4;
+          outData[i]     = sampleBilinear(srcData, width, height, sx, sy, 0);
+          outData[i + 1] = sampleBilinear(srcData, width, height, sx, sy, 1);
+          outData[i + 2] = sampleBilinear(srcData, width, height, sx, sy, 2);
+          outData[i + 3] = 255;
+        }
+      }
+
+      ctx.putImageData(out, 0, 0);
+      downloadBtn.disabled = false;
+    }
+
+    function handleFile(file) {
+      if (!file) {
+        return;
+      }
+
+      const image = new Image();
+      image.onload = () => {
+        drawLoadedImage(image);
+        distortImage();
+      };
+      image.src = URL.createObjectURL(file);
+    }
+
+    function downloadImage() {
+      if (!sourceLoaded) {
+        return;
+      }
+      const link = document.createElement("a");
+      link.download = `distorted-${Date.now()}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
+    fileInput.addEventListener("change", (event) => {
+      const [file] = event.target.files || [];
+      handleFile(file);
+    });
+
+    downloadBtn.addEventListener("click", downloadImage);
+  </script>
+</body>
+</html>
