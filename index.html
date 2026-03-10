@@ -116,7 +116,7 @@
 
     .actions {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
 
@@ -139,6 +139,11 @@
       color: var(--ink);
       background: #fff6ef;
       border: 1px solid var(--border);
+    }
+
+    .share-x {
+      color: white;
+      background: #000;
     }
 
     .stage {
@@ -206,6 +211,7 @@
 
         <div class="actions">
           <button id="downloadBtn" class="download" type="button" disabled>Download</button>
+          <button id="shareBtn" class="share-x" type="button" disabled>Share to 𝕏</button>
         </div>
       </aside>
     </section>
@@ -216,6 +222,7 @@
     const intensityInput = document.getElementById("intensity");
     const intensityLabel = document.getElementById("intensityValue");
     const downloadBtn = document.getElementById("downloadBtn");
+    const shareBtn = document.getElementById("shareBtn");
     const canvas = document.getElementById("canvas");
     const emptyMsg = document.getElementById("emptyMsg");
 
@@ -261,6 +268,7 @@
       emptyMsg.hidden = true;
       canvas.hidden = false;
       downloadBtn.disabled = true;
+      shareBtn.disabled = true;
     }
 
     function distortImage() {
@@ -325,6 +333,7 @@
 
       ctx.putImageData(out, 0, 0);
       downloadBtn.disabled = false;
+      shareBtn.disabled = false;
     }
 
     function handleFile(file) {
@@ -358,6 +367,19 @@
     });
 
     downloadBtn.addEventListener("click", downloadImage);
+
+    shareBtn.addEventListener("click", async () => {
+      if (!sourceLoaded) return;
+      canvas.toBlob(async (blob) => {
+        const file = new File([blob], "distorted.png", { type: "image/png" });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: "My distorted face", text: "I just distorted my face! Try it: https://poorlittletommy.github.io/facedistorter/" });
+        } else {
+          const url = "https://x.com/intent/tweet?text=" + encodeURIComponent("I just distorted my face! Try it: https://poorlittletommy.github.io/facedistorter/");
+          window.open(url, "_blank", "noopener");
+        }
+      }, "image/png");
+    });
 
     // Drag & drop support
     const stage = document.querySelector(".stage");
