@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Distortion Hat Machine</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a2e;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: #fff;
+            gap: 24px;
+            padding: 24px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .upload-btn {
+            padding: 10px 24px;
+            background: #e94560;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .upload-btn:hover { background: #c73650; }
+        .download-btn {
+            padding: 10px 24px;
+            background: #0f3460;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .download-btn:hover { background: #16213e; }
+        #fileInput { display: none; }
+        canvas {
+            border-radius: 12px;
+            background: #fff;
+            max-width: 90vw;
+        }
+        .hint {
+            color: #888;
+            font-size: 14px;
+        }
+        canvas.dragover {
+            outline: 3px dashed #e94560;
+            outline-offset: 4px;
+        }
+        .bottom-links {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .link-btn {
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: #fff;
+            text-decoration: none;
+            text-align: center;
+            transition: transform 160ms ease;
+        }
+        .link-btn:active { transform: translateY(1px) scale(0.99); }
+        .address-btn {
+            flex: 1;
+            padding: 10px 8px;
+            background: linear-gradient(135deg, #00d18c, #00b87a);
+        }
+        .decay-btn {
+            background: linear-gradient(135deg, #7744dd, #5522aa);
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>slap a logo on the distortion hat</h1>
+    <div class="controls">
+        <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Upload Logo</button>
+        <button class="download-btn" onclick="downloadImage()">Download</button>
+    </div>
+    <p class="hint">throw your logo at this thing idc (drag & drop or click the button)</p>
+    <div class="bottom-links">
+        <a href="https://dexscreener.com/solana/CCmh7tvVRrCaExBn6Uu3AyDZr5P16WhJnZcLvAMHkec4" target="_blank" rel="noopener noreferrer" class="link-btn address-btn">EPuZ1X6pPzac3ELPsT59LStmgaSr4kBJvaAbL15Fpump</a>
+    </div>
+    <input type="file" id="fileInput" accept="image/*">
+    <canvas id="canvas" width="512" height="620"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const baseImg = new Image();
+        let logoImg = null;
+
+        const defaultLogo = new Image();
+        defaultLogo.onload = () => {
+            logoImg = defaultLogo;
+            draw();
+        };
+        defaultLogo.src = 'default-logo.png';
+
+        baseImg.onload = () => draw();
+        baseImg.src = 'default.png';
+
+        function loadLogoFromFile(file) {
+            if (!file || !file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    logoImg = img;
+                    draw();
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            loadLogoFromFile(e.target.files[0]);
+        });
+
+        // Drag and drop
+        canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            canvas.classList.add('dragover');
+        });
+        canvas.addEventListener('dragleave', () => {
+            canvas.classList.remove('dragover');
+        });
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            canvas.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            loadLogoFromFile(file);
+        });
+
+        function draw() {
+            const W = canvas.width;
+            const H = canvas.height;
+            const emojiSize = 500;
+            const emojiX = (W - emojiSize) / 2;
+            const emojiY = H - emojiSize;
+
+            ctx.clearRect(0, 0, W, H);
+
+            // Draw emoji
+            ctx.drawImage(baseImg, emojiX, emojiY, emojiSize, emojiSize);
+
+            // Hat parameters - scale everything by s
+            const s = 0.60;
+            const hatCenterX = W / 2;
+            // The emoji png has ~15% transparent padding around the face
+            // The actual face top is roughly at emojiY + emojiSize * 0.15
+            // We want the brim (at crownBottomY) to sit just above the eyes (~35% down)
+            // brimBottomY should be around emojiY + emojiSize * 0.35
+            const brimTarget = emojiY + emojiSize * 0.38;
+            const hatTopY = brimTarget - 235 * s;  // work backwards from desired brim position
+            const crownBottomY = hatTopY + 165 * s;
+            const brimBottomY = hatTopY + 235 * s;
+
+            // Shadow under brim
+            ctx.save();
+            ctx.beginPath();
+            ctx.ellipse(hatCenterX, crownBottomY + 6, 200 * s, 20 * s, 0, 0, Math.PI);
+            ctx.fillStyle = 'rgba(0,0,0,0.18)';
+            ctx.fill();
+            ctx.restore();
+
+            // Cap crown (dome)
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(hatCenterX - 190 * s, crownBottomY);
+            ctx.quadraticCurveTo(hatCenterX - 185 * s, hatTopY + 30 * s, hatCenterX, hatTopY + 10 * s);
+            ctx.quadraticCurveTo(hatCenterX + 185 * s, hatTopY + 30 * s, hatCenterX + 190 * s, crownBottomY);
+            ctx.closePath();
+
+            const crownGrad = ctx.createRadialGradient(hatCenterX, crownBottomY - 40 * s, 20, hatCenterX, crownBottomY - 40 * s, 200 * s);
+            crownGrad.addColorStop(0, '#3a3a3a');
+            crownGrad.addColorStop(1, '#1a1a1a');
+            ctx.fillStyle = crownGrad;
+            ctx.fill();
+            ctx.restore();
+
+            // Crown base ellipse
+            ctx.save();
+            ctx.beginPath();
+            ctx.ellipse(hatCenterX, crownBottomY, 190 * s, 40 * s, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#1e1e1e';
+            ctx.fill();
+            ctx.restore();
+
+            // Panel lines
+            ctx.save();
+            ctx.globalAlpha = 0.2;
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1.5;
+            // Center line
+            ctx.beginPath();
+            ctx.moveTo(hatCenterX, hatTopY + 10 * s);
+            ctx.lineTo(hatCenterX, crownBottomY);
+            ctx.stroke();
+            // Left panel
+            ctx.beginPath();
+            ctx.moveTo(hatCenterX - 65 * s, hatTopY + 20 * s);
+            ctx.quadraticCurveTo(hatCenterX - 60 * s, crownBottomY - 40 * s, hatCenterX - 55 * s, crownBottomY);
+            ctx.stroke();
+            // Right panel
+            ctx.beginPath();
+            ctx.moveTo(hatCenterX + 65 * s, hatTopY + 20 * s);
+            ctx.quadraticCurveTo(hatCenterX + 60 * s, crownBottomY - 40 * s, hatCenterX + 55 * s, crownBottomY);
+            ctx.stroke();
+            ctx.restore();
+
+            // Button on top
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(hatCenterX, hatTopY + 12 * s, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#222';
+            ctx.fill();
+            ctx.restore();
+
+            // Brim
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(hatCenterX - 190 * s, crownBottomY);
+            ctx.quadraticCurveTo(hatCenterX - 200 * s, crownBottomY + 15 * s, hatCenterX - 185 * s, brimBottomY);
+            ctx.quadraticCurveTo(hatCenterX, brimBottomY + 20 * s, hatCenterX + 185 * s, brimBottomY);
+            ctx.quadraticCurveTo(hatCenterX + 200 * s, crownBottomY + 15 * s, hatCenterX + 190 * s, crownBottomY);
+            ctx.quadraticCurveTo(hatCenterX, crownBottomY + 35 * s, hatCenterX - 190 * s, crownBottomY);
+            ctx.closePath();
+
+            const brimGrad = ctx.createLinearGradient(0, crownBottomY, 0, brimBottomY);
+            brimGrad.addColorStop(0, '#2a2a2a');
+            brimGrad.addColorStop(1, '#111');
+            ctx.fillStyle = brimGrad;
+            ctx.fill();
+            ctx.restore();
+
+            // Brim edge highlight
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(hatCenterX - 185 * s, crownBottomY + 5);
+            ctx.quadraticCurveTo(hatCenterX, crownBottomY + 38 * s, hatCenterX + 185 * s, crownBottomY + 5);
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.restore();
+
+            // White circular patch
+            const patchX = hatCenterX;
+            const patchY = hatTopY + 90 * s;
+            const patchR = 28;
+
+            // Draw logo inside patch (clipped to circle, no border)
+            if (logoImg) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(patchX, patchY, patchR, 0, Math.PI * 2);
+                ctx.clip();
+
+                // Fit logo into circle
+                const logoSize = patchR * 2;
+                const aspect = logoImg.width / logoImg.height;
+                let drawW, drawH;
+                if (aspect > 1) {
+                    drawW = logoSize;
+                    drawH = logoSize / aspect;
+                } else {
+                    drawH = logoSize;
+                    drawW = logoSize * aspect;
+                }
+                ctx.drawImage(logoImg, patchX - drawW / 2, patchY - drawH / 2, drawW, drawH);
+                ctx.restore();
+            } else {
+                // Placeholder text
+                ctx.save();
+                ctx.fillStyle = '#bbb';
+                ctx.font = '11px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('YOUR LOGO', patchX, patchY);
+                ctx.restore();
+            }
+        }
+
+        function downloadImage() {
+            const link = document.createElement('a');
+            link.download = 'hat-emoji.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
